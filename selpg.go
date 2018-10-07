@@ -37,8 +37,8 @@ func output(printer string, dst io.Writer, data []byte) {
 	if printer == "" {
 		dst.Write(data)
 	} else {
-		// cmd := exec.Command("lp", "-d" + printer)
-		cmd := exec.Command("cat")
+		cmd := exec.Command("lp", "-d" + printer)
+		// cmd := exec.Command("cat")
 		in, err := cmd.StdinPipe()
 		check(err)
 

@@ -7,35 +7,40 @@ import (
 	"os"
 )
 
-func main() {
-	var start, end, leap int
-	var f bool
+type SelpgArgs struct {
+	start int
+	end int
+	leap int
+	find bool
+	dest string
+}
 
-	flag.IntVarP(&start, "start", "s", 0, "start page")
-	flag.IntVarP(&end, "end", "e", 1, "end page")
-	flag.IntVarP(&leap, "leap", "l", 72, "the count of row in each page")
-	flag.BoolVarP(&f, "find", "f", false, "find page")
+func main() {
+	var args SelpgArgs
+
+	flag.IntVarP(&args.start, "start", "s", -1, "Start page")
+	flag.IntVarP(&args.end, "end", "e", -1, "End page")
+	flag.IntVarP(&args.leap, "leap", "l", 72, "The count of row in each page")
+	flag.BoolVarP(&args.find, "find", "f", false, "Find page breaks")
+	flag.StringVarP(&args.dest, "dest", "d", "", "Destination")
 	flag.Parse()
-	for i, a := range os.Args[1:] {
-		fmt.Printf("Argument %d is %s\n", i+1, a)
-	}
-	if end < start || start <= 0 {
+	if args.end < args.start || args.start <= 0 {
 		fmt.Println("invalid start and end")
 		return
 	}
-	if leap <= 0 {
+	if args.leap <= 0 {
 		fmt.Println("invalid the count of row in each page")
 		return
 	}
-	if leap != 72 && f {
+	if args.leap != 72 && args.find {
 		fmt.Println("you can't use two mode in the same time")
 		return
 	}
-	fmt.Println(start, end, leap, f)
-	start--
-	if !f {
-		start *= leap
-		end *= leap
+	// fmt.Println(start, end, leap, f)
+	args.start--
+	if !args.find {
+		args.start *= args.leap
+		args.end *= args.leap
 	}
 
 	// get fileName
@@ -51,15 +56,20 @@ func main() {
 		}
 	}
 	if fileName != "" {
-		fmt.Println("file: ", fileName)
+		// fmt.Println("file: ", fileName)
 		file, err := os.Open(fileName)
-		if err != nil {
-			panic(err)
-		}
+		check(err)
 		inputReader := bufio.NewReader(file)
-		selpg(inputReader, os.Stdout, start, end, f)
+		selpg(inputReader, os.Stdout, args)
 	} else {
 		inputReader := bufio.NewReader(os.Stdin)
-		selpg(inputReader, os.Stdout, start, end, f)
+		selpg(inputReader, os.Stdout, args)
+	}
+}
+
+
+func check(err error) {
+	if err != nil {
+		panic(err)
 	}
 }

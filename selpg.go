@@ -7,7 +7,6 @@ import (
 )
 
 func selpg(src *bufio.Reader, dst io.Writer, args SelpgArgs) {
-	// fmt.Println(begin, end ,page)
 	if args.find {
 		count := 0
 		for count < args.start {
@@ -40,16 +39,15 @@ func output(printer string, dst io.Writer, data []byte) {
 	} else {
 		// cmd := exec.Command("lp", "-d" + printer)
 		cmd := exec.Command("cat")
-		stdin, err := cmd.StdinPipe()
+		in, err := cmd.StdinPipe()
 		check(err)
 
 		go func() {
-			defer stdin.Close()
-			io.WriteString(stdin, string(data))
+			defer in.Close()
+			io.WriteString(in, string(data))
 		}()
 		_, err = cmd.CombinedOutput()
 		check(err)
-
 		// fmt.Printf("%s\n", out)
 	}
 }

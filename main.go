@@ -13,11 +13,24 @@ type SelpgArgs struct {
 	leap int
 	find bool
 	dest string
+	fileName string
 }
 
 func main() {
 	var args SelpgArgs
+	parseArgs(&args)
+	if args.fileName != "" {
+		file, err := os.Open(args.fileName)
+		check(err)
+		inputReader := bufio.NewReader(file)
+		selpg(inputReader, os.Stdout, args)
+	} else {
+		inputReader := bufio.NewReader(os.Stdin)
+		selpg(inputReader, os.Stdout, args)
+	}
+}
 
+func parseArgs(args *SelpgArgs) {
 	flag.IntVarP(&args.start, "start", "s", -1, "Start page")
 	flag.IntVarP(&args.end, "end", "e", -1, "End page")
 	flag.IntVarP(&args.leap, "leap", "l", 72, "The count of row in each page")
@@ -36,37 +49,23 @@ func main() {
 		fmt.Println("you can't use two mode in the same time")
 		return
 	}
-	// fmt.Println(start, end, leap, f)
 	args.start--
 	if !args.find {
 		args.start *= args.leap
 		args.end *= args.leap
 	}
-
 	// get fileName
-	fileName := ""
 	for i := 1; i < len(os.Args); i++ {
 		if os.Args[i][0] == '-' {
 			if len(os.Args[i]) == 2 && os.Args[i][1] != 'f' {
 				i++
 			}
 		} else {
-			fileName = os.Args[i]
+			args.fileName = os.Args[i]
 			break
 		}
 	}
-	if fileName != "" {
-		// fmt.Println("file: ", fileName)
-		file, err := os.Open(fileName)
-		check(err)
-		inputReader := bufio.NewReader(file)
-		selpg(inputReader, os.Stdout, args)
-	} else {
-		inputReader := bufio.NewReader(os.Stdin)
-		selpg(inputReader, os.Stdout, args)
-	}
 }
-
 
 func check(err error) {
 	if err != nil {
